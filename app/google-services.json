@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "356633979503",
+    "project_id": "ustdy-c5abd",
+    "storage_bucket": "ustdy-c5abd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:356633979503:android:269450776e29a7d6d5bb9a",
+        "android_client_info": {
+          "package_name": "com.example.ustdytake2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJP6X2d9Q65AZkR214f1L0O_YkIudyuYs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
