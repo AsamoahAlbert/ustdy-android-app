@@ -12,11 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UstdyTake2">
 
-        <!-- Test backend activity is now the launcher -->
+        <!-- MainActivity is now the launcher -->
         <activity
-            android:name=".TestBackendActivity"
+            android:name=".MainActivity"
             android:exported="true"
-            android:label="Backend Test"
+            android:label="@string/app_name"
             android:theme="@style/Theme.UstdyTake2">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,11 +24,11 @@
             </intent-filter>
         </activity>
 
-        <!-- MainActivity stays but is not the launcher -->
+        <!-- TestBackendActivity is still available but NOT the launcher -->
         <activity
-            android:name=".MainActivity"
+            android:name=".TestBackendActivity"
             android:exported="true"
-            android:label="@string/app_name"
+            android:label="Backend Test"
             android:theme="@style/Theme.UstdyTake2" />
 
     </application>
