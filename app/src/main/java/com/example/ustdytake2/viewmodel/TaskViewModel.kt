@@ -41,13 +41,13 @@ class TaskViewModel(
     fun markTaskComplete(
         userId: String,
         classId: String,
-        taskId: String,
+        task: TaskItem,
         completed: Boolean
     ) {
         viewModelScope.launch {
-            val result = repo.updateTaskCompletion(userId, classId, taskId, completed)
+            val result = repo.updateTaskCompletion(userId, classId, task, completed)
             result.fold(
-                onSuccess = { loadTasks(userId, classId) },
+                onSuccess = { loadTasks(userId, classId) }, // this also updates gamification in TaskRepository
                 onFailure = { _error.value = it.message }
             )
         }

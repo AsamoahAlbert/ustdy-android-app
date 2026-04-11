@@ -6,5 +6,6 @@ data class TaskItem(
     val type: String = "",
     val dueDate: Long = 0L,
     val completed: Boolean = false,
-    val reminderDate: Long = 0L
+    val reminderDate: Long = 0L,
+    val completedAt: Long = 0L
 )
