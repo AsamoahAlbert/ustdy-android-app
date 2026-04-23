@@ -17,14 +17,26 @@ class GamificationRepository(
 
             val badges = snapshot.get("badges") as? List<*>
             Result.success(
-                GamificationData(
-                    streak = (snapshot.getLong("streak") ?: 0L).toInt(),
-                    lastStudyDate = snapshot.getLong("lastStudyDate") ?: 0L,
-                    badges = badges?.mapNotNull { it as? String } ?: emptyList()
+                mapGamificationData(
+                    streak = snapshot.getLong("streak"),
+                    lastStudyDate = snapshot.getLong("lastStudyDate"),
+                    badges = badges
                 )
             )
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
+}
+
+internal fun mapGamificationData(
+    streak: Long?,
+    lastStudyDate: Long?,
+    badges: List<*>?
+): GamificationData {
+    return GamificationData(
+        streak = (streak ?: 0L).toInt(),
+        lastStudyDate = lastStudyDate ?: 0L,
+        badges = badges?.mapNotNull { it as? String } ?: emptyList()
+    )
 }

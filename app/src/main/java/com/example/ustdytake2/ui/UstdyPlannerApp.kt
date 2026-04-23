@@ -66,9 +66,7 @@ fun UstdyPlannerApp(
 
     LaunchedEffect(classes, currentUserId) {
         if (!isDemoMode && currentUserId != null && classes.isNotEmpty()) {
-            val classToUse = selectedClass?.takeIf { existing ->
-                classes.any { it.id == existing.id }
-            } ?: classes.first()
+            val classToUse = selectActiveClass(classes, selectedClass) ?: return@LaunchedEffect
             selectedClass = classToUse
             taskViewModel.loadTasks(currentUserId.orEmpty(), classToUse.id)
         }
@@ -82,7 +80,11 @@ fun UstdyPlannerApp(
             )
         }
     }
-    val plannerTasks = if (isDemoMode) localTasks else remotePlannerTasks + localTasks
+    val plannerTasks = mergePlannerTasks(
+        isDemoMode = isDemoMode,
+        remoteTasks = remotePlannerTasks,
+        localTasks = localTasks
+    )
 
     when (destination) {
         AppDestination.AUTH -> {
@@ -146,16 +148,12 @@ fun UstdyPlannerApp(
                 badges = gamificationData.badges,
                 onToggleTask = { task, completed ->
                     if (isDemoMode || currentUserId == null || task.classId == null || !task.isRemote) {
-                        localTasks = localTasks.map { existing ->
-                            if (existing.id == task.id) {
-                                existing.copy(
-                                    completed = completed,
-                                    completedAtMillis = if (completed) System.currentTimeMillis() else 0L
-                                )
-                            } else {
-                                existing
-                            }
-                        }
+                        localTasks = applyLocalTaskCompletion(
+                            localTasks = localTasks,
+                            task = task,
+                            completed = completed,
+                            completedAtMillis = System.currentTimeMillis()
+                        )
                     } else {
                         taskViewModel.markTaskComplete(
                             currentUserId.orEmpty(),
@@ -176,7 +174,7 @@ fun UstdyPlannerApp(
                 },
                 onDeleteTask = { task ->
                     if (isDemoMode || currentUserId == null || task.classId == null || !task.isRemote) {
-                        localTasks = localTasks.filterNot { it.id == task.id }
+                        localTasks = deleteLocalTask(localTasks, task.id)
                     } else {
                         taskViewModel.deleteTask(currentUserId.orEmpty(), task.classId, task.id)
                     }
@@ -196,13 +194,12 @@ fun UstdyPlannerApp(
                 taskToEdit = taskBeingEdited,
                 onSave = { savedTask ->
                     if (isDemoMode || currentUserId == null || selectedClass?.id == null) {
-                        localTasks = if (taskBeingEdited == null) {
-                            localTasks + savedTask.copy(id = UUID.randomUUID().toString())
-                        } else {
-                            localTasks.map { task ->
-                                if (task.id == savedTask.id) savedTask else task
-                            }
-                        }
+                        localTasks = saveLocalTask(
+                            localTasks = localTasks,
+                            taskBeingEdited = taskBeingEdited,
+                            savedTask = savedTask,
+                            generatedId = UUID.randomUUID().toString()
+                        )
                     } else {
                         val classId = (savedTask.classId ?: selectedClass?.id).orEmpty()
                         val remoteTask = savedTask.copy(classId = classId, isRemote = true)
@@ -217,7 +214,7 @@ fun UstdyPlannerApp(
                 onCancel = { destination = AppDestination.DASHBOARD },
                 onDelete = { task ->
                     if (isDemoMode || currentUserId == null || task.classId == null || !task.isRemote) {
-                        localTasks = localTasks.filterNot { it.id == task.id }
+                        localTasks = deleteLocalTask(localTasks, task.id)
                     } else {
                         taskViewModel.deleteTask(currentUserId.orEmpty(), task.classId, task.id)
                     }

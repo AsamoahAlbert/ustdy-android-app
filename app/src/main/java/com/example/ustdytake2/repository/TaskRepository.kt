@@ -36,14 +36,14 @@ class TaskRepository(
                 .await()
 
             val tasks = snapshot.documents.map { doc ->
-                TaskItem(
+                mapTaskItem(
                     id = doc.id,
-                    title = doc.getString("title").orEmpty(),
-                    type = doc.getString("type").orEmpty(),
-                    dueDate = doc.getLong("dueDate") ?: 0L,
-                    completed = doc.getBoolean("completed") ?: false,
-                    reminderDate = doc.getLong("reminderDate") ?: 0L,
-                    completedAt = doc.getLong("completedAt") ?: 0L
+                    title = doc.getString("title"),
+                    type = doc.getString("type"),
+                    dueDate = doc.getLong("dueDate"),
+                    completed = doc.getBoolean("completed"),
+                    reminderDate = doc.getLong("reminderDate"),
+                    completedAt = doc.getLong("completedAt")
                 )
             }
 
@@ -108,4 +108,24 @@ class TaskRepository(
             Result.failure(e)
         }
     }
+}
+
+internal fun mapTaskItem(
+    id: String,
+    title: String?,
+    type: String?,
+    dueDate: Long?,
+    completed: Boolean?,
+    reminderDate: Long?,
+    completedAt: Long?
+): TaskItem {
+    return TaskItem(
+        id = id,
+        title = title.orEmpty(),
+        type = type.orEmpty(),
+        dueDate = dueDate ?: 0L,
+        completed = completed ?: false,
+        reminderDate = reminderDate ?: 0L,
+        completedAt = completedAt ?: 0L
+    )
 }
