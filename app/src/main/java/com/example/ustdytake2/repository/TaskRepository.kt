@@ -6,7 +6,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
 class TaskRepository(
-    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance(),
+    private val gamificationRepo: GamificationRepository = GamificationRepository()
 ) {
 
     suspend fun addTask(userId: String, classId: String, task: TaskItem): Result<String> {
@@ -60,14 +61,27 @@ class TaskRepository(
         completed: Boolean
     ): Result<Unit> {
         return try {
-            db.collection("users")
+            val taskRef = db.collection("users")
                 .document(userId)
                 .collection("classes")
                 .document(classId)
                 .collection("tasks")
                 .document(task.id)
-                .update("completed", completed)
-                .await()
+
+            val completedAt = if (completed) System.currentTimeMillis() else 0L
+
+            taskRef.update(
+                "completed", completed,
+                "completedAt", completedAt
+            ).await()
+
+            if (completed) {
+                val updatedTask = task.copy(
+                    completed = true,
+                    completedAt = completedAt
+                )
+                gamificationRepo.onTaskCompleted(userId, updatedTask).getOrThrow()
+            }
 
             Result.success(Unit)
         } catch (e: Exception) {

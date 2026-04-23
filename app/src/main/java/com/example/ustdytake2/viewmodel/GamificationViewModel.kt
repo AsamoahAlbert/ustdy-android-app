@@ -2,16 +2,11 @@ package com.example.ustdytake2.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ustdytake2.model.GamificationData
 import com.example.ustdytake2.repository.GamificationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
-data class GamificationData(
-    val streak: Int = 0,
-    val lastStudyDate: Long = 0L,
-    val badges: List<String> = emptyList()
-)
 
 class GamificationViewModel(
     private val repo: GamificationRepository = GamificationRepository()
