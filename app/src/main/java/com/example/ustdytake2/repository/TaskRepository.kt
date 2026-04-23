@@ -36,7 +36,15 @@ class TaskRepository(
                 .await()
 
             val tasks = snapshot.documents.map { doc ->
-                doc.toObject(TaskItem::class.java)!!.copy(id = doc.id)
+                TaskItem(
+                    id = doc.id,
+                    title = doc.getString("title").orEmpty(),
+                    type = doc.getString("type").orEmpty(),
+                    dueDate = doc.getLong("dueDate") ?: 0L,
+                    completed = doc.getBoolean("completed") ?: false,
+                    reminderDate = doc.getLong("reminderDate") ?: 0L,
+                    completedAt = doc.getLong("completedAt") ?: 0L
+                )
             }
 
             Result.success(tasks)
@@ -48,7 +56,7 @@ class TaskRepository(
     suspend fun updateTaskCompletion(
         userId: String,
         classId: String,
-        taskId: String,
+        task: TaskItem,
         completed: Boolean
     ): Result<Unit> {
         return try {
@@ -57,8 +65,42 @@ class TaskRepository(
                 .collection("classes")
                 .document(classId)
                 .collection("tasks")
-                .document(taskId)
+                .document(task.id)
                 .update("completed", completed)
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateTask(userId: String, classId: String, task: TaskItem): Result<Unit> {
+        return try {
+            db.collection("users")
+                .document(userId)
+                .collection("classes")
+                .document(classId)
+                .collection("tasks")
+                .document(task.id)
+                .set(task.copy(id = ""))
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteTask(userId: String, classId: String, taskId: String): Result<Unit> {
+        return try {
+            db.collection("users")
+                .document(userId)
+                .collection("classes")
+                .document(classId)
+                .collection("tasks")
+                .document(taskId)
+                .delete()
                 .await()
 
             Result.success(Unit)

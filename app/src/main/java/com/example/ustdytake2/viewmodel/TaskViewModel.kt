@@ -41,11 +41,31 @@ class TaskViewModel(
     fun markTaskComplete(
         userId: String,
         classId: String,
-        taskId: String,
+        task: TaskItem,
         completed: Boolean
     ) {
         viewModelScope.launch {
-            val result = repo.updateTaskCompletion(userId, classId, taskId, completed)
+            val result = repo.updateTaskCompletion(userId, classId, task, completed)
+            result.fold(
+                onSuccess = { loadTasks(userId, classId) },
+                onFailure = { _error.value = it.message }
+            )
+        }
+    }
+
+    fun updateTask(userId: String, classId: String, task: TaskItem) {
+        viewModelScope.launch {
+            val result = repo.updateTask(userId, classId, task)
+            result.fold(
+                onSuccess = { loadTasks(userId, classId) },
+                onFailure = { _error.value = it.message }
+            )
+        }
+    }
+
+    fun deleteTask(userId: String, classId: String, taskId: String) {
+        viewModelScope.launch {
+            val result = repo.deleteTask(userId, classId, taskId)
             result.fold(
                 onSuccess = { loadTasks(userId, classId) },
                 onFailure = { _error.value = it.message }

@@ -43,7 +43,9 @@ fun UpcomingAssignmentsScreen(
     userName: String,
     reminderPreferences: ReminderPreferences,
     tasks: List<PlannerTask>,
-    onToggleTask: (String, Boolean) -> Unit,
+    streak: Int,
+    badges: List<String>,
+    onToggleTask: (PlannerTask, Boolean) -> Unit,
     onAddTask: () -> Unit,
     onEditTask: (PlannerTask) -> Unit,
     onDeleteTask: (PlannerTask) -> Unit,
@@ -87,6 +89,8 @@ fun UpcomingAssignmentsScreen(
                         userName = userName,
                         reminderPreferences = reminderPreferences,
                         weeklyTaskCount = weeklyTasks.size,
+                        streak = streak,
+                        badges = badges,
                         onAddTask = onAddTask,
                         onRestart = onRestart,
                         modifier = Modifier.weight(1f)
@@ -104,6 +108,8 @@ fun UpcomingAssignmentsScreen(
                     userName = userName,
                     reminderPreferences = reminderPreferences,
                     weeklyTaskCount = weeklyTasks.size,
+                    streak = streak,
+                    badges = badges,
                     onAddTask = onAddTask,
                     onRestart = onRestart,
                     modifier = Modifier.fillMaxWidth()
@@ -136,6 +142,8 @@ private fun DashboardSummaryCard(
     userName: String,
     reminderPreferences: ReminderPreferences,
     weeklyTaskCount: Int,
+    streak: Int,
+    badges: List<String>,
     onAddTask: () -> Unit,
     onRestart: () -> Unit,
     modifier: Modifier = Modifier
@@ -168,6 +176,18 @@ private fun DashboardSummaryCard(
             ReminderRow("Exams", reminderPreferences.exams.label)
             ReminderRow("Weekly Assignments", reminderPreferences.weeklyAssignments.label)
             ReminderRow("Large Projects", reminderPreferences.largeProjects.label)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Streak: $streak day${if (streak == 1) "" else "s"}",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = if (badges.isEmpty()) "Badges: none yet" else "Badges: ${badges.joinToString()}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Spacer(modifier = Modifier.height(18.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(onClick = onAddTask, modifier = Modifier.weight(1f)) {
@@ -309,7 +329,7 @@ private fun SelectedDayCard(selectedDay: Long, tasks: List<PlannerTask>) {
 @Composable
 private fun ChecklistCard(
     tasks: List<PlannerTask>,
-    onToggleTask: (String, Boolean) -> Unit,
+    onToggleTask: (PlannerTask, Boolean) -> Unit,
     onEditTask: (PlannerTask) -> Unit,
     onDeleteTask: (PlannerTask) -> Unit
 ) {
@@ -344,7 +364,7 @@ private fun ChecklistCard(
                             ) {
                                 Checkbox(
                                     checked = task.completed,
-                                    onCheckedChange = { onToggleTask(task.id, it) }
+                                    onCheckedChange = { onToggleTask(task, it) }
                                 )
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(text = task.title, fontWeight = FontWeight.Medium)
@@ -410,6 +430,8 @@ private fun UpcomingAssignmentsScreenPreview() {
             userName = "Noah",
             reminderPreferences = ReminderPreferences(),
             tasks = demoTasks(),
+            streak = 4,
+            badges = listOf("Early Bird", "Consistency"),
             onToggleTask = { _, _ -> },
             onAddTask = {},
             onEditTask = {},
