@@ -181,7 +181,10 @@ fun AddAssignmentScreen(
                                             dueDateMillis = dueDate,
                                             className = className.trim(),
                                             reminderDateMillis = reminderDate,
-                                            completed = taskToEdit?.completed ?: false
+                                            completed = taskToEdit?.completed ?: false,
+                                            completedAtMillis = taskToEdit?.completedAtMillis ?: 0L,
+                                            classId = taskToEdit?.classId,
+                                            isRemote = taskToEdit?.isRemote ?: false
                                         )
                                     )
                                 }

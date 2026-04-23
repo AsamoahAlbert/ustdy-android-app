@@ -37,7 +37,15 @@ class TaskRepository(
                 .await()
 
             val tasks = snapshot.documents.map { doc ->
-                doc.toObject(TaskItem::class.java)!!.copy(id = doc.id)
+                mapTaskItem(
+                    id = doc.id,
+                    title = doc.getString("title"),
+                    type = doc.getString("type"),
+                    dueDate = doc.getLong("dueDate"),
+                    completed = doc.getBoolean("completed"),
+                    reminderDate = doc.getLong("reminderDate"),
+                    completedAt = doc.getLong("completedAt")
+                )
             }
 
             Result.success(tasks)
@@ -62,13 +70,11 @@ class TaskRepository(
 
             val completedAt = if (completed) System.currentTimeMillis() else 0L
 
-            // 1) Update task in Firestore
             taskRef.update(
                 "completed", completed,
                 "completedAt", completedAt
             ).await()
 
-            // 2) Trigger gamification logic using the updated task data
             if (completed) {
                 val updatedTask = task.copy(
                     completed = true,
@@ -82,4 +88,58 @@ class TaskRepository(
             Result.failure(e)
         }
     }
+
+    suspend fun updateTask(userId: String, classId: String, task: TaskItem): Result<Unit> {
+        return try {
+            db.collection("users")
+                .document(userId)
+                .collection("classes")
+                .document(classId)
+                .collection("tasks")
+                .document(task.id)
+                .set(task.copy(id = ""))
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteTask(userId: String, classId: String, taskId: String): Result<Unit> {
+        return try {
+            db.collection("users")
+                .document(userId)
+                .collection("classes")
+                .document(classId)
+                .collection("tasks")
+                .document(taskId)
+                .delete()
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
+
+internal fun mapTaskItem(
+    id: String,
+    title: String?,
+    type: String?,
+    dueDate: Long?,
+    completed: Boolean?,
+    reminderDate: Long?,
+    completedAt: Long?
+): TaskItem {
+    return TaskItem(
+        id = id,
+        title = title.orEmpty(),
+        type = type.orEmpty(),
+        dueDate = dueDate ?: 0L,
+        completed = completed ?: false,
+        reminderDate = reminderDate ?: 0L,
+        completedAt = completedAt ?: 0L
+    )
 }

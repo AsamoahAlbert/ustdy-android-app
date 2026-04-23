@@ -12,8 +12,8 @@ class GamificationViewModel(
     private val repo: GamificationRepository = GamificationRepository()
 ) : ViewModel() {
 
-    private val _data = MutableStateFlow(GamificationData())
-    val data: StateFlow<GamificationData> = _data
+    private val _gamification = MutableStateFlow(GamificationData())
+    val gamification: StateFlow<GamificationData> = _gamification
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
@@ -22,8 +22,11 @@ class GamificationViewModel(
         viewModelScope.launch {
             val result = repo.getGamification(userId)
             result.fold(
-                onSuccess = { _data.value = it },
-                onFailure = { _error.value = it.message }
+                onSuccess = { _gamification.value = it },
+                onFailure = {
+                    _gamification.value = GamificationData()
+                    _error.value = it.message
+                }
             )
         }
     }

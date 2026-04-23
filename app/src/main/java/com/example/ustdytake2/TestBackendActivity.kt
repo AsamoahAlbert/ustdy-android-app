@@ -80,8 +80,8 @@ class TestBackendActivity : ComponentActivity() {
 
                             // 5. Mark the first task complete
                             if (tasks.isNotEmpty()) {
-                                val taskId = tasks.first().id
-                                taskVM.markTaskComplete(userId, classId, taskId, true)
+                                val taskToComplete = tasks.first()
+                                taskVM.markTaskComplete(userId, classId, taskToComplete, true)
                                 println("Marked task complete")
                             }
                         }

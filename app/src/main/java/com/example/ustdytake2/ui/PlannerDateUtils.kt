@@ -35,7 +35,7 @@ fun formatLongDate(timeMillis: Long): String = longFormatter.format(Date(timeMil
 
 fun formatEditorDate(timeMillis: Long): String = editorFormatter.format(Date(timeMillis))
 
-fun parseDate(value: String): Long? = editorFormatter.parse(value)?.time
+fun parseDate(value: String): Long? = runCatching { editorFormatter.parse(value)?.time }.getOrNull()
 
 fun startOfDay(timeMillis: Long): Long {
     val calendar = Calendar.getInstance().apply { this.timeInMillis = timeMillis }

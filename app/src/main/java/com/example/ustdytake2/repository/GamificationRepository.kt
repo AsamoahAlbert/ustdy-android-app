@@ -12,15 +12,26 @@ class GamificationRepository(
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) {
 
-    suspend fun getGamification(userId: String): Result<GamificationData> = runCatching {
-        val snap = db.collection("users").document(userId).get().await()
-        snap.toObject(GamificationData::class.java) ?: GamificationData()
+    suspend fun getGamification(userId: String): Result<GamificationData> {
+        return try {
+            val snapshot = db.collection("users")
+                .document(userId)
+                .get()
+                .await()
+
+            val badges = snapshot.get("badges") as? List<*>
+            Result.success(
+                mapGamificationData(
+                    streak = snapshot.getLong("streak"),
+                    lastStudyDate = snapshot.getLong("lastStudyDate"),
+                    badges = badges
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    /**
-     * Called whenever a task is marked completed.
-     * This is where streak + badge logic lives.
-     */
     suspend fun onTaskCompleted(userId: String, task: TaskItem): Result<Unit> = runCatching {
         val userRef = db.collection("users").document(userId)
 
@@ -41,8 +52,6 @@ class GamificationRepository(
             )
         }.await()
     }
-
-    // ---------- private helpers (streak + badges) ----------
 
     private fun updateStreak(current: GamificationData): GamificationData {
         val today = LocalDate.now()
@@ -74,7 +83,6 @@ class GamificationRepository(
     ): List<String> {
         val badges = existingBadges.toMutableList()
 
-        // Early completion badge
         if (task.completedAt > 0L &&
             task.reminderDate > 0L &&
             task.completedAt < task.reminderDate &&
@@ -83,7 +91,6 @@ class GamificationRepository(
             badges.add("early_bird")
         }
 
-        // Streak badges
         if (updated.streak >= 7 && "week_streak_7" !in badges) {
             badges.add("week_streak_7")
         }
@@ -93,4 +100,16 @@ class GamificationRepository(
 
         return badges
     }
+}
+
+internal fun mapGamificationData(
+    streak: Long?,
+    lastStudyDate: Long?,
+    badges: List<*>?
+): GamificationData {
+    return GamificationData(
+        streak = (streak ?: 0L).toInt(),
+        lastStudyDate = lastStudyDate ?: 0L,
+        badges = badges?.mapNotNull { it as? String } ?: emptyList()
+    )
 }

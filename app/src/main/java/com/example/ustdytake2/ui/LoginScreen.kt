@@ -37,9 +37,11 @@ import com.example.ustdytake2.ui.theme.Cream100
 import com.example.ustdytake2.ui.theme.Cream50
 import com.example.ustdytake2.ui.theme.Sky500
 import com.example.ustdytake2.ui.theme.UstdyTake2Theme
+import com.example.ustdytake2.viewmodel.AuthState
 
 @Composable
 fun LoginScreen(
+    authState: AuthState,
     onLogin: (String, String) -> Unit,
     onCreateAccount: (String, String) -> Unit,
     onContinueAsDemo: () -> Unit,
@@ -49,6 +51,11 @@ fun LoginScreen(
     var password by rememberSaveable { mutableStateOf("") }
     var helperMessage by rememberSaveable { mutableStateOf("Use a school email or username to get started.") }
     val isValid = identifier.isNotBlank() && password.length >= 6
+    val authMessage = when (authState) {
+        is AuthState.Error -> authState.message
+        AuthState.Loading -> "Signing in..."
+        else -> helperMessage
+    }
 
     Box(
         modifier = modifier
@@ -142,9 +149,13 @@ fun LoginScreen(
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = helperMessage,
+                        text = authMessage,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Sky500
+                        color = if (authState is AuthState.Error) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            Sky500
+                        }
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Row(
@@ -183,6 +194,7 @@ fun LoginScreen(
 private fun LoginScreenPreview() {
     UstdyTake2Theme {
         LoginScreen(
+            authState = AuthState.Idle,
             onLogin = { _, _ -> },
             onCreateAccount = { _, _ -> },
             onContinueAsDemo = {}
