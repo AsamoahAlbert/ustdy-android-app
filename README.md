@@ -18,9 +18,17 @@ It helps students organize classes, track assignments, and stay on top of deadli
 ---
 ## 📸 Screenshots
 
-| Login Screen | Onboarding | Dashboard |
-|-------------|------------|-----------|
-| ![Login](images/login.png) | ![Setup](images/setup.png) | ![Dashboard](images/dashboard.png) |
+### Onboarding Flow
+
+![Step 1](images/setup1.png)
+![Step 2](images/setup2.png)
+![Step 3](images/setup3.png)
+![Step 4](images/setup4.png)
+![Step 5](images/setup5.png)
+
+### Dashboard
+
+![Dashboard](images/dashboard.png)
 
 
 
