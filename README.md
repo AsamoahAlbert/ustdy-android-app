@@ -74,7 +74,7 @@ It helps students organize classes, track assignments, and stay on top of deadli
 ## 📥 Demo
 
 - APK available for testing (can be shared upon request)
-- Demo video included in project submission
+- Demo video included in project submission : https://drive.google.com/file/d/1W8GN9AMCn8mUoInqZ401jF6vDAvxm7GR/view?usp=drive_link
 
 ---
 ## 📦 Build & Run
